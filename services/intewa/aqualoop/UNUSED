@@ -1,0 +1,94 @@
+/* AIR change timestamps */
+static timestamp_t last_change_air_on = 0;
+static timestamp_t last_change_air_off = 0;
+static uint8_t toggle_air = false;
+
+/* SLUDGE change timestamps */
+static timestamp_t last_change_sludge_on = 0;
+static timestamp_t last_change_sludge_off = 0;
+//static timestamp_t last_interrupt_sludge = 0;
+static uint8_t toggle_sludge = false;
+
+
+
+void aqualoop_air_toggle_core(void) {
+
+  /* Aktuellen timestamp holen (wird in Sekunden seit 1.1.1970 zurückgegeben */
+  timestamp_t temp_ts = clock_get_time();
+
+  /* Falls im Menu ON = 0 gesetzt ist, wird der Ausgang dauerhaft ausgeschaltet */
+  if (aqualoop_params_ram.air_on == 0) {
+    PIN_CLEAR(AL_COMPRESSOR_AIR);
+    toggle_air = false;
+    last_change_air_on = 0;
+    last_change_air_off = 0;
+  }
+
+  if (aqualoop_params_ram.air_on > 0) {
+
+    if ( toggle_air == false) {
+
+      /* Im Menu wird die Laufzeit in Minuten angegeben, daher müssen wir die Sekunden mit 60 multiplizieren */
+      if ( temp_ts - last_change_air_off >= (uint32_t)aqualoop_params_ram.air_off * 60 ) {
+        last_change_air_on = temp_ts;
+        PIN_SET(AL_COMPRESSOR_AIR);
+        toggle_air = true;
+      }
+
+    } else {
+
+      if ( temp_ts - last_change_air_on >= (uint32_t)aqualoop_params_ram.air_on * 60 ) {
+        last_change_air_off = temp_ts;
+        PIN_CLEAR(AL_COMPRESSOR_AIR);
+        toggle_air = false;
+      }
+
+    }
+
+  }
+
+}
+
+
+
+void aqualoop_sludge_toggle_core(void) {
+
+  /* Aktuellen timestamp holen (wird in Sekunden seit 1.1.1970 zurückgegeben */
+  timestamp_t temp_ts = clock_get_time();
+
+  /* Falls im Menu ON = 0 gesetzt ist, wird der Ausgang dauerhaft ausgeschaltet */
+  if (aqualoop_params_ram.sludge_pump_days == 0) {
+    PIN_CLEAR(AL_SLUDGE_PUMP);
+    toggle_sludge = false;
+    last_change_sludge_on = 0;
+    last_change_sludge_off = 0;
+  }
+
+  if (aqualoop_params_ram.sludge_pump_days > 0) {
+
+    if ( toggle_sludge == false) {
+
+      /* Im Menu wird die Laufzeit in Tage angegeben, daher müssen wir die Sekunden mit 86400 multiplizieren (1d = 86400s) */
+      if ( temp_ts - last_change_sludge_off >= (uint32_t)aqualoop_params_ram.sludge_pump_days * 86400 ) {
+        last_change_sludge_on = temp_ts;
+        PIN_SET(AL_SLUDGE_PUMP);
+        toggle_sludge = true;
+      }
+
+    } else {
+
+      //if ( last_interrupt_sludge );
+
+      if ( temp_ts - last_change_sludge_on >= (uint32_t)aqualoop_params_ram.sludge_pump_minutes * 60 ) {
+        last_change_sludge_off = temp_ts;
+        PIN_CLEAR(AL_SLUDGE_PUMP);
+        toggle_sludge = false;
+      }
+
+    }
+
+  }
+
+}
+
+

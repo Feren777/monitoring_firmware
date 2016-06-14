@@ -1,0 +1,12 @@
+dep_bool_menu "INTEWA Rainmaster" RAINMASTER_SUPPORT
+	dep_bool "Method init auto start" RAINMASTER_INIT_AUTOSTART_SUPPORT $RAINMASTER_SUPPORT
+	dep_bool "Method periodic auto start" RAINMASTER_PERIODIC_AUTOSTART_SUPPORT $RAINMASTER_SUPPORT
+
+
+
+	comment "Basic RAINMASTER Settings ---"
+
+
+	comment  "Debugging Flags"
+	dep_bool "Rainmaster Debug" DEBUG_RAINMASTER $DEBUG $RAINMASTER_SUPPORT
+endmenu

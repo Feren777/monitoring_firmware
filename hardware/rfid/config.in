@@ -1,0 +1,5 @@
+dep_bool_menu "RFID reader EM4095" RFID_SUPPORT
+  comment  "Debugging Flags"
+  dep_bool 'RFID'   DEBUG_RFID $DEBUG
+  dep_bool 'EM4095' DEBUG_EM4095 $DEBUG
+endmenu

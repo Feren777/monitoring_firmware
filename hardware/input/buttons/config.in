@@ -1,0 +1,28 @@
+dep_bool_menu "Buttons Input" BUTTONS_INPUT_SUPPORT $ARCH_AVR
+if [ "$BUTTONS_INPUT_SUPPORT" = "y" ]; then
+	comment "I/O Pin configuration"
+	dep_bool "Use internal pullups" CONF_BUTTONS_USE_PULLUPS $BUTTONS_INPUT_SUPPORT
+	choice "Button active level"     \
+    	"HIGH CONF_BUTTONS_LEVEL_HIGH \
+	 	 LOW CONF_BUTTONS_LEVEL_LOW"  \
+        'LOW'
+	if [ "$CONF_BUTTONS_LEVEL_HIGH" = "y" ]; then
+      define_int CONF_BUTTONS_LEVEL 1
+    else
+      define_int CONF_BUTTONS_LEVEL 2
+    fi
+
+	comment  "Timing parameters"
+	int "Debounce delay (x * 20 ms)" CONF_BUTTONS_DEBOUNCE_DELAY 4
+	int "Longpress delay (x * 20 ms)" CONF_BUTTONS_LONGPRESS_DELAY 100
+	
+	comment  "Repeat function"
+	dep_bool "Enable repeat" CONF_BUTTONS_USE_REPEAT $BUTTONS_INPUT_SUPPORT
+	if [ "$CONF_BUTTONS_USE_REPEAT" = "y" ]; then
+		int "Repeat delay (x * 20 ms)" CONF_BUTTONS_REPEAT_DELAY 175
+		int "Repeat rate (x * 20 ms)" CONF_BUTTONS_REPEAT_RATE 25
+	fi
+	comment  "Debugging Flags"
+	dep_bool "Button input Debug" DEBUG_BUTTONS $DEBUG $BUTTONS_INPUT_SUPPORT
+fi	
+endmenu

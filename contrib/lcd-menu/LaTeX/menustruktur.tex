@@ -1,0 +1,358 @@
+\documentclass[tikz,border=20pt]{standalone}
+%\documentclass{minimal}
+
+%\usepackage[a4paper,margin=1cm,landscape]{geometry}
+%\usepackage{tikz}
+
+\usetikzlibrary{shapes,arrows,positioning,shadows,trees}
+\usepackage[utf8]{inputenc}
+
+\usepackage{xcolor}
+\usepackage{lcd}        %% LCD panel 
+\usepackage{fdsymbol}	%% Arrows inside butttons
+
+
+\definecolor{lightgreen}{rgb}{0.05,0.97,0.55}
+\definecolor{darkgreen}{rgb}{0.22,0.26,0.19}
+\definecolor{lightred}{rgb}{1.0,0.27,0.37}
+\definecolor{darkred}{rgb}{0.37,0.14,0.18}
+\definecolor{lightblue}{RGB}{210,210,255}
+\definecolor{darkblue}{RGB}{0,6,60}
+
+\DefineLCDchar{deg}  {11100101001110000000000000000000000}
+\DefineLCDchar{arrup}{11111001000111011111000000000000000}
+\DefineLCDchar{arrdn}{00000000000000011111011100010011111}
+
+
+
+
+\begin{document}
+
+% Define page and color styles
+\sffamily
+\pagestyle{empty}
+\LCDcolors[lightblue]{lightblue}{darkblue}
+
+
+
+% Define block styles
+\tikzstyle{blocktitle} = [text width=62mm, text centered, minimum height=20mm, auto] %
+
+\tikzstyle{block} = [text width=62mm, draw, drop shadow, text centered, rounded corners, minimum height=20mm, fill=gray, ] %
+
+\tikzstyle{descr} = [text centered, ] %
+
+\tikzstyle{line} = [draw, -latex, line width=2.5pt, rounded corners, ] %
+
+%\tikzstyle{next} =  [rectangle, draw, fill=black!40,  line width=1pt, rounded corners, minimum height=12mm, minimum width=12mm, text centered, yshift=8pt, label={[xshift=0mm, yshift=2mm]\begin{tabular}{@{}c@{}} \small{\textcolor{white!30}{\bfseries{NEXT}}}  \\ \large{\textcolor{white!30}{\bfseries{$\rightarrow$}}} \end{tabular}} ,  ] %
+
+%\tikzstyle{enter} = [rectangle, draw, fill=black!40,  line width=1pt, rounded corners, minimum height=12mm, minimum width=12mm, text centered, xshift=8pt, label={[xshift=1.8mm, yshift=-1mm]\begin{tabular}{@{}c@{}} \small{\textcolor{white!30}{\bfseries{ENTER}}} \\ \large{\textcolor{white!30}{\bfseries{$\Rdsh$}}}       \end{tabular}} ,  ] %
+
+
+\tikzstyle{next} =  [rectangle, draw, line width=1pt, rounded corners, minimum height=12mm, minimum width=12mm, text centered, yshift=8pt, font={\begin{tabular}{@{}c@{}} \small{\bfseries{NEXT}}  \\ \large{\textcolor{white!30}{\bfseries{$\rightarrow$}}} \end{tabular}} ,  ] %
+
+\tikzstyle{enter} = [rectangle, draw, line width=1pt, rounded corners, minimum height=12mm, minimum width=12mm, text centered, xshift=8pt, font={\begin{tabular}{@{}c@{}} \small{\bfseries{ENTER}} \\ \large{\bfseries{$\Rdsh$}}       \end{tabular}} ,  ] %
+
+
+% Define the nodes and paths
+\begin{tikzpicture}[node distance=90mm, auto, ]
+
+	%%\centering
+	%%\Huge{Functional description of AQUALOOP LCD menu system}\normalsize
+
+    %% TOP LEVEL INFO SCREENS %%
+
+    % Initial node
+    \node [block, label={\bfseries{Initial screen}}] (infoscreen)  {%
+	    %\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|18:12:25h {|} C= 4 / 8|
+                   |T1=11:30h {|}T2=17:45h|
+                   |AIR OFF               |
+                   |BRmin {arrup}   {|}CLmax {arrdn}  |
+        \end{minipage}
+        %\end{tabular}
+    };
+        
+    \node [block, right of=infoscreen] (infoclock)  {%
+        %\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Info CLOCK ]=====|
+                   |Date: Thu 03.12.2015|
+                   |Time: 18:12:25 +1:00|
+                   |Unix: 1449174819    |
+        \end{minipage}
+        %\end{tabular}
+    };
+        
+    \node [block, right of=infoclock]   (infotimers)  {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Info SENSORS ]===|
+                   |RPM: 758 {|} Temp: 24{deg} |
+                   |                    |
+                   |                    |
+        \end{minipage}
+        %\end{tabular}
+    };
+        
+    \node [block, right of=infotimers]  (infonetwork) {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Info NETWORK ]===|
+                   | IP:192.168.1.64    |
+                   |GWY:192.168.1.1     |
+                   |DNS:192.168.1.1     |
+        \end{minipage}
+        %\end{tabular}
+    };
+        
+    \node [block, right of=infonetwork] (infomonitor) {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Info MONITOR ]===|
+                   |                    |
+                   |                    |
+                   |                    |
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line] (infomonitor.east) -- node[next]{} ([xshift=1.8cm] infomonitor.east) |- ([yshift=+1cm] infoscreen.north)  coordinate (aux) -| ([xshift=-1cm] infoscreen.west) -- (infoscreen.west);
+    
+
+
+    %% OTHER MENU STRUCTURES %%
+
+    \path [line] (infoscreen)  -- node [next]{} (infoclock);
+    \path [line] (infoclock)   -- node [next]{} (infotimers);
+    \path [line] (infotimers)  -- node [next]{} (infonetwork);
+    \path [line, dashed] (infonetwork) -- node [next]{} (infomonitor);
+
+    \node [block, node distance=45mm, below of=infoclock]   (minfoclock)   {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{ENTER a functional menu} \\
+            All parameters are grouped in sections \\
+            depending on usage or function. \\
+        \end{tabular}
+    };
+    \node [block, node distance=45mm, below of=infotimers]  (minfotimers)  {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{Menu SENSORS} \\
+            All parameters needed by the sensors. \\
+        \end{tabular}
+    };
+    \node [block, node distance=45mm, below of=infonetwork] (minfonetwork) {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{Menu NETWORK} \\
+            All parameters to set up the network. \\
+        \end{tabular}
+    };
+    \node [block, node distance=45mm, below of=infomonitor] (minfomonitor) {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{Menu MONITORING} \\
+            All parameters engaging monitoring. \\
+        \end{tabular}
+    };
+
+    %\node [blocktitle, node distance=14mm, above of=infoscreen]        (a1)  {Info AQUALOOP};
+    %\node [blocktitle, node distance=14mm, above of=infoclock]      (a2)  {Info CLOCK};
+    %\node [blocktitle, node distance=14mm, above of=infotimers]      (a3)  {Info TIMERS};
+    %\node [blocktitle, node distance=14mm, above of=infonetwork]    (a4)  {Info NETWORK};
+    %\node [blocktitle, node distance=14mm, above of=infomonitor]    (a5)  {Info MONITOR};
+
+
+
+    %% MENU NAVIGATION  %%
+
+    \node [block, node distance=120mm, below of=infoscreen]  (mi_config_mem_set_menu)  {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Menu AQUALOOP ]==|
+                   |1: Membranes config |
+                   |                    |
+                   |NEXT:Next  ENTER=Set|
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line] (infoscreen)  -- node [enter]{} (mi_config_mem_set_menu);
+
+    \path [line, dashed] (infoclock)   -- node [enter]{} (minfoclock);
+    \path [line, dashed] (infotimers)  -- node [enter]{} (minfotimers);
+    \path [line, dashed] (infonetwork) -- node [enter]{} (minfonetwork);
+    \path [line, dashed] (infomonitor) -- node [enter]{} (minfomonitor); 
+
+
+    \node [block, node distance=90mm, right of=mi_config_mem_set_menu]  (mi_config_sof_set_menu)  {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Menu AQUALOOP ]==|
+                   |2: Suction overflow |
+                   |                    |
+                   |NEXT:Next  ENTER=Set|
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line] (mi_config_mem_set_menu)  -- node [next]{} (mi_config_sof_set_menu);
+
+
+    \node [block, node distance=45mm, below of=mi_config_sof_set_menu]   (mi_config_set_sof)   {
+       	\begin{tabular}{@{}c@{}}
+    	    \bfseries{MODIFY a single parameter} \\
+    		Depends on the format of the parameter.  
+        \end{tabular}
+    };
+    \path [line, dashed] (mi_config_sof_set_menu)  -- node [enter]{} (mi_config_set_sof);
+
+
+    \node [block, node distance=90mm, right of=mi_config_sof_set_menu]  (mi_config_slp_set_menu)  {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Menu AQUALOOP ]==|
+                   |3: Sludge pump      |
+                   |                    |
+                   |NEXT:Next  ENTER=Set|
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line] (mi_config_sof_set_menu)   -- node [next]{} (mi_config_slp_set_menu);        
+
+
+    \node [block, node distance=90mm, right of=mi_config_slp_set_menu]  (mi_config_c12_set_menu)  {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Menu AQUALOOP ]==|
+                   |4: C1/C2 suction    |
+                   |                    |
+                   |NEXT:Next  ENTER=Set|
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line] (mi_config_slp_set_menu)  -- node [next]{} (mi_config_c12_set_menu);
+
+
+    \node [block, node distance=90mm, right of=mi_config_c12_set_menu]  (mi_config_back_set_menu)  {%
+        %\begin{tabular}{@{}c@{}}
+        %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|=[ Menu AQUALOOP ]==|
+                   |Return              |
+                   |                    |
+                   |NEXT:Next  ENTER=Set|
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line, dashed] (mi_config_c12_set_menu)  -- node [next]{} (mi_config_back_set_menu);
+    
+	\path [line] (mi_config_back_set_menu.north) -- node[enter, xshift=40pt]{}  ([yshift=+2cm] mi_config_back_set_menu.north)  coordinate (aux) -| ([xshift=+2.5cm] infoscreen.south);
+
+
+    \node [block, node distance=45mm, below of=mi_config_back_set_menu] (mi_config_back_set_info) {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{RETURN to info screen} \\
+            ENTER: return to function info screen. \\
+            NEXT: continue with first item of list. \\
+        \end{tabular}
+    };
+	\path [line, dashed] (mi_config_back_set_menu) -- node [enter]{} (mi_config_back_set_info);
+	
+	
+
+	%% PARAMETER SETTINGS %%
+	
+    \node [block, node distance=90mm, below of=mi_config_mem_set_menu]  (mi_config_set_mem)  {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|Change MEM (number) |
+                   |                    |
+                   |Set MEM=[1]         |
+                   |NEXT:Edit ENTER=Save|
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line] (mi_config_mem_set_menu)  -- node [enter]{} (mi_config_set_mem);    
+        
+        
+    \node [block, right of=mi_config_set_mem]  (mi_config_set_mem2)  {%
+    	%\begin{tabular}{@{}c@{}}
+	    %Infoscreen AQUALOOP \\
+        \begin{minipage}{62mm}
+        \centering
+        \LCD{4}{20}|Change MEM (number) |
+                   |                    |
+                   |Set MEM=[2]         |
+                   |NEXT:Edit ENTER=Save|
+        \end{minipage}
+        %\end{tabular}
+    };
+    \path [line] (mi_config_set_mem)  -- node [next]{} (mi_config_set_mem2);
+        
+    \path [line] (mi_config_set_mem)  -- node[enter]{} ([yshift=-2cm] mi_config_set_mem.south) -| ([xshift=-1cm] mi_config_set_mem.west)   |- (mi_config_mem_set_menu.west);        
+        
+    \path [line] (mi_config_set_mem2.south) -- node[enter]{} ([yshift=-2cm] mi_config_set_mem2.south) -- ([yshift=-2cm] mi_config_set_mem.south) ;        
+
+
+    \node [block, right of=mi_config_set_mem2]  (mi_config_set_info)  {%
+    	\begin{tabular}{@{}c@{}}
+    	    \bfseries{SET the parameter value(s)} \\
+    		NEXT: increment the parameter value \\
+    		depending on the range of the value. \\
+    		ENTER: {\bfseries{SAVE}} and return to menu item.
+        \end{tabular}
+    };
+    \path [line, dashed] (mi_config_set_mem2)  -- node [next]{} (mi_config_set_info);
+    
+    \path [line] (mi_config_set_info.east) -- node[next]{} ([xshift=1.8cm] mi_config_set_info.east) |- ([yshift=+1cm] mi_config_set_info.north)  coordinate (aux) -| ([xshift=2.5cm] mi_config_set_mem.north);
+
+    \path [line] (mi_config_set_info.south) -- node[enter]{} ([yshift=-2cm] mi_config_set_info.south) -- ([yshift=-2cm] mi_config_set_mem2.south) ;        
+
+ 	\path [line] (mi_config_back_set_menu.east) -- node[next]{}  ([xshift=1.8cm] mi_config_back_set_menu.east) |- ([yshift=-2cm] mi_config_set_info.south);
+	
+		
+
+    \node [descr, node distance=90mm, left of=infoscreen]   (top-level-info)   {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{INFO LEVEL: Info screens} \\
+            NEXT: switch to next screen  \\
+            ENTER:  enter to function menu \\
+        \end{tabular}
+    }; 
+    
+    \node [descr, node distance=90mm, left of=mi_config_mem_set_menu]   (menu-level-info)   {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{MENU LEVEL: Functional parameter list} \\
+            NEXT: navigate to next parameter  \\
+            ENTER: modify parameter or return \\
+        \end{tabular}
+    };
+    
+    \node [descr, node distance=90mm, left of=mi_config_set_mem]   (para-level-info)   {%
+        \begin{tabular}{@{}c@{}}
+            \bfseries{EDIT LEVEL: Single parameter edit} \\
+            NEXT: increment value or pairs \\
+            ENTER: save value and return to list \\
+        \end{tabular}
+    };
+	            
+\end{tikzpicture}
+\end{document}

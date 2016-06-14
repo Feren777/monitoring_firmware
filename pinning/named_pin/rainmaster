@@ -1,0 +1,27 @@
+#
+#   Named Pin Configuration File
+#
+# You can assign names to your microcontroller's pins here.
+# Keep in mind that this names must consist of alphanumeric 
+# characters only!
+#
+# Every line starting with a hash sign (#) is a comment.
+#
+#
+# PIN | IN/OUT | When active? | Name
+#-----+--------+--------------+----------------
+#PB5	OUTPUT	 HIGH		Suction	(PWM)
+#PB6	OUTPUT	 HIGH		Backflush (PWM)
+#PB7	OUTPUT	 HIGH		Air (PWM)
+#
+PG0	OUTPUT	HIGH		SludgePump
+PG1	OUTPUT	HIGH		CompressorAir
+PG2	OUTPUT	HIGH		PiezoWarn
+#PA0	INPUT	LOW		SSKlarMin	
+PA0	INPUT	LOW		PumpContact	
+#PA1	INPUT	LOW		SSKlarMax
+PA1	INPUT	LOW		FloatSwitch
+#PA2	INPUT	LOW		SSBrMin
+PA2	INPUT	LOW		Pos1Switch
+PA4	INPUT	LOW		S1
+PA5	INPUT	LOW		S2

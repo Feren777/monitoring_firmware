@@ -1,0 +1,1 @@
+dep_bool "PSB2186 (ISDN) D-channel controller" PSB2186_SUPPORT

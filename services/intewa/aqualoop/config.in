@@ -1,0 +1,32 @@
+dep_bool_menu "INTEWA Aqualoop" AQUALOOP_SUPPORT
+	dep_bool "Method init auto start" AQUALOOP_INIT_AUTOSTART_SUPPORT $AQUALOOP_SUPPORT
+	dep_bool "Method periodic auto start" AQUALOOP_PERIODIC_AUTOSTART_SUPPORT $AQUALOOP_SUPPORT
+
+
+
+	comment "Basic AQUALOOP Settings ---"
+	int "Default Number of Membranes      [MEM]" 	AQUALOOP_NUMBER_MEMBRANES 	1
+	int "Default Suction Overflow (weeks) [SO]" 	AQUALOOP_SO 				0
+
+	comment "Air Compressor Settings ---"
+	int "Default CompressorAir ON  (minutes) [AIRon]" 	AQUALOOP_AIRON 		5
+	int "Default CompressorAir OFF (minutes) [AIRoff]" 	AQUALOOP_AIROFF 	15
+
+	comment "Sludge Pump Settings ---"
+	int "Default SludgePump OFF (weeks)   [SLPw]" 	AQUALOOP_SLPW 	1
+	int "Default SludgePump OFF (days)    [SLPd]" 	AQUALOOP_SLPD 	7
+	int "Default SludgePump ON  (minutes) [SLPm]" 	AQUALOOP_SLPM 	15
+
+	comment "C1/C2 Suction Cycle Settings ---"
+	int "Default C1 (cycles) [C1]" 	AQUALOOP_C1 	4
+	int "Default C2 (cycles) [C2]" 	AQUALOOP_C2 	8
+
+	comment "T1/T2 Pumping Cycle Settings ---"
+	int "Default T1 (hour)   [T1h]" 	AQUALOOP_T1H 	11
+	int "Default T1 (minute) [T1m]" 	AQUALOOP_T1M 	30
+	int "Default T2 (hour)   [T2h]" 	AQUALOOP_T2H 	17
+	int "Default T2 (minute) [T2m]" 	AQUALOOP_T2M 	45
+
+	comment  "Debugging Flags"
+	dep_bool "Aqualoop Debug" DEBUG_AQUALOOP $DEBUG $AQUALOOP_SUPPORT
+endmenu

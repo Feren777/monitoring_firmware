@@ -1,0 +1,104 @@
+
+
+int16_t current0 = aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_0, -1);
+char current0_str[5];
+itoa(current0, current0_str, 10);
+HTTPLOG("959c8f40-25c0-11e5-9ceb-ff3de36d44dc.json?ts=%lu000&value=%s", clock_get_time(), current0_str);
+WAIT(2);
+
+
+int16_t current1 = aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_1, -6);
+char current1_str[5];
+itoa(current1, current1_str, 10);
+HTTPLOG("0418e1a0-25c1-11e5-abe7-33ec3bd6bc28.json?ts=%lu000&value=%s", clock_get_time(), current1_str);
+WAIT(2);
+
+
+
+
+    dnl Send 24V Values 
+    WAIT(30);
+
+    int16_t volt24 = aqualoop_get_24v();
+
+    char volt24_str[5];
+    itoa_fixedpoint(volt24, 2, volt24_str);
+
+    HTTPLOG("c8ad9060-a0aa-11e4-9cb6-e31ca043737c.json?ts=%lu000&value=%s", clock_get_time(), volt24_str);
+    WAIT(2);
+
+    
+
+    int16_t temp = 0;
+    char temp_str[5];
+
+    dnl Send Vorlauftemperatur
+ 
+    // Get value of 1-Wire sensor
+    //temp = ONEWIRE_GET(282349d4050000d1);
+    temp = aqualoop_get_temperature(&romcodeVorlauf);
+     // Convert value to string
+    itoa_fixedpoint(temp, 2, temp_str);
+ 
+    // Write value to httplog
+    HTTPLOG("21cc01a0-aa0e-11e4-a1c2-299d6bfb7501.json?ts=%lu000&value=%s", clock_get_time(), temp_str);
+    WAIT(2);
+    
+
+
+    /**
+    // Read current sensors
+    int16_t current0 = aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_0, -1);
+    char current0_str[5];
+    itoa(current0, current0_str, 10);
+    HTTPLOG("959c8f40-25c0-11e5-9ceb-ff3de36d44dc.json?ts=%lu000&value=%s", clock_get_time(), current0_str);
+    WAIT(2);
+
+    int16_t current1 = aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_1, -6);
+    char current1_str[5];
+    itoa(current1, current1_str, 10);
+    HTTPLOG("0418e1a0-25c1-11e5-abe7-33ec3bd6bc28.json?ts=%lu000&value=%s", clock_get_time(), current1_str);
+    WAIT(2);
+    **/
+
+
+
+
+
+
+
+    /***
+    int16_t temp = 0;
+    char temp_str[6];
+
+    // Get value of 1-Wire sensor
+    temp = aqualoop_get_temperature(&romcodeGelb);
+    itoa_fixedpoint(temp, 2, temp_str);
+     // Write value to httplog
+    HTTPLOG("17625220-e0b7-11e5-917d-430ed13e4764.json?ts=%lu000&value=%s", clock_get_time(), temp_str);
+    WAIT(2);
+
+    // Get value of 1-Wire sensor
+    temp = aqualoop_get_temperature(&romcodeGruen);
+    itoa_fixedpoint(temp, 2, temp_str);
+     // Write value to httplog
+    HTTPLOG("23954bc0-e0b7-11e5-869f-49e01cc1d6b7.json?ts=%lu000&value=%s", clock_get_time(), temp_str);
+    WAIT(2);
+    ***/
+
+
+    // Read current sensors
+    int16_t current0 = aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_0, 0);
+    char current0_str[5];
+    itoa(current0, current0_str, 10);
+    HTTPLOG("959c8f40-25c0-11e5-9ceb-ff3de36d44dc.json?ts=%lu000&value=%s", clock_get_time(), current0_str);
+    WAIT(2);
+
+    int16_t current1 = aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_1, 5);
+    char current1_str[5];
+    itoa(current1, current1_str, 10);
+    HTTPLOG("0418e1a0-25c1-11e5-abe7-33ec3bd6bc28.json?ts=%lu000&value=%s", clock_get_time(), current1_str);
+    WAIT(2);
+
+
+    

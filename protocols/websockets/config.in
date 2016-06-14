@@ -1,0 +1,3 @@
+dep_bool_menu "WebSockets (HTTP WS)" WEBSOCKET_SUPPORT
+	int "WebSocket Port" WEBSOCKET_PORT 8888 $WEBSOCKET_SUPPORT
+endmenu

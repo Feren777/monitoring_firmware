@@ -1,0 +1,21 @@
+C6_HEADER(`/* This will be in control6.h */')
+dnl
+#include "protocols/httplog/httplog.h"
+#include "services/clock/clock.h"
+#include "services/intewa/aqualoop/aqualoop_sensors.h"
+#include "core/util/fixedpoint.h"
+
+dnl
+CONTROL_START
+
+  THREAD(Telemetrics)
+
+
+
+  THREAD_END(Telemetrics)
+
+  	ON STARTUP DO THREAD_START(Telemetrics) END;
+
+
+CONTROL_END
+
