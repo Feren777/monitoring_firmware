@@ -52,10 +52,12 @@ struct pumpcycle cycle_chem;    // Chemical cleaning cycle
 /* AIR change timestamps */
 static timestamp_t last_change_air = 0;
 static uint8_t toggle_air = false;
+static uint8_t state_air = false;
 
 /* SLUDGE change timestamps */
 static timestamp_t last_change_sludge = 0;
 static uint8_t toggle_sludge = false;
+static uint8_t state_sludge = false;
 
 /* Pumps PWM duty cycle depending on MEM setting */
 const uint8_t mem_pwm[] =
@@ -91,7 +93,7 @@ void aqualoop_air_toggle_core(void) {
 
   /* Falls im Menu ON = 0 gesetzt ist, wird der Ausgang dauerhaft ausgeschaltet */
   if (aqualoop_params_ram.air_on == 0) {
-    PIN_CLEAR(AL_COMPRESSOR_AIR);
+    state_air = false; //PIN_CLEAR(AL_COMPRESSOR_AIR);
     toggle_air = false;
     last_change_air = 0;
   }
@@ -103,7 +105,7 @@ void aqualoop_air_toggle_core(void) {
       /* Im Menu wird die Laufzeit in Minuten angegeben, daher müssen wir die Sekunden mit 60 multiplizieren */
       if ( air_ts - last_change_air >= (uint32_t)aqualoop_params_ram.air_off * 60 ) {
         last_change_air = air_ts;
-        PIN_SET(AL_COMPRESSOR_AIR);
+        state_air = true; //PIN_SET(AL_COMPRESSOR_AIR);
         toggle_air = true;
       }
 
@@ -111,7 +113,7 @@ void aqualoop_air_toggle_core(void) {
 
       if ( air_ts - last_change_air >= (uint32_t)aqualoop_params_ram.air_on * 60 ) {
         last_change_air = air_ts;
-        PIN_CLEAR(AL_COMPRESSOR_AIR);
+        state_air = false; //PIN_CLEAR(AL_COMPRESSOR_AIR);
         toggle_air = false;
       }
 
@@ -119,6 +121,11 @@ void aqualoop_air_toggle_core(void) {
 
   }
 
+  // Falls BRmin Schwimmschalter genügend Wasser meldet, dann aktiviere die Lüftung nach Bedarf
+  if (al_sensors.SSBRmin && state_air)
+    PIN_SET(AL_COMPRESSOR_AIR);
+  else
+    PIN_CLEAR(AL_COMPRESSOR_AIR);
 }
 
 
@@ -130,7 +137,7 @@ void aqualoop_sludge_toggle_core(void) {
 
   /* Falls im Menu ON = 0 gesetzt ist, wird der Ausgang dauerhaft ausgeschaltet */
   if (aqualoop_params_ram.sludge_pump_days == 0) {
-    PIN_CLEAR(AL_SLUDGE_PUMP);
+    state_sludge = false; //PIN_CLEAR(AL_SLUDGE_PUMP);
     toggle_sludge = false;
     last_change_sludge = 0;
   }
@@ -142,17 +149,15 @@ void aqualoop_sludge_toggle_core(void) {
       /* Im Menu wird die Laufzeit in Tage angegeben, daher müssen wir die Sekunden mit 86400 multiplizieren (1d = 86400s) */
       if ( sludge_ts - last_change_sludge >= (uint32_t)aqualoop_params_ram.sludge_pump_days * 86400 ) {
         last_change_sludge = sludge_ts;
-        PIN_SET(AL_SLUDGE_PUMP);
+        state_sludge = true; //PIN_SET(AL_SLUDGE_PUMP);
         toggle_sludge = true;
       }
 
     } else {
 
-      //if ( last_interrupt_sludge );
-
       if ( sludge_ts - last_change_sludge >= (uint32_t)aqualoop_params_ram.sludge_pump_minutes * 60 ) {
         last_change_sludge = sludge_ts;
-        PIN_CLEAR(AL_SLUDGE_PUMP);
+        state_sludge = false; //PIN_CLEAR(AL_SLUDGE_PUMP);
         toggle_sludge = false;
       }
 
@@ -160,6 +165,11 @@ void aqualoop_sludge_toggle_core(void) {
 
   }
 
+  // Falls BRmin Schwimmschalter genügend Wasser meldet, dann aktiviere die Schlammpumpe nach Bedarf
+  if (al_sensors.SSBRmin && state_sludge)
+    PIN_SET(AL_SLUDGE_PUMP);
+  else
+    PIN_CLEAR(AL_SLUDGE_PUMP);
 }
 
 
@@ -177,6 +187,18 @@ d8888b. db    db .88b  d88. d8888b.  .o88b. db    db  .o88b. db      d88888b
 88      88b  d88 88  88  88 88      Y8b  d8    88    Y8b  d8 88booo. 88.     
 88      ~Y8888P' YP  YP  YP 88       `Y88P'    YP     `Y88P' Y88888P Y88888P 
 */
+
+void aqualoop_setsuction(uint8_t pwm) {
+
+  (al_sensors.SSBRmin && !al_sensors.SSKlarmax) ? setpwm('a', pwm) : setpwm('a', 0);
+}
+
+void aqualoop_setbackflush(uint8_t pwm) {
+
+  (al_sensors.SSBRmin && !al_sensors.SSKlarmax) ? setpwm('b', pwm) : setpwm('b', 0);
+
+}
+
 
 timestamp_t day_seconds(void) {
 
@@ -267,9 +289,11 @@ void aqualoop_pumps_cycle(struct pumpcycle *cycle) {
         AQUALOOPDEBUG("%lu Begin Suction..\n", cycle->next_ts);
       }
 
-      /* Do something else ... */
-      setpwm('a', 0);
-      setpwm('b', 0);
+      /* STOP */
+      //setpwm('a', 0);
+      //setpwm('b', 0);
+      aqualoop_setsuction(0);
+      aqualoop_setbackflush(0);
     }
 
 
@@ -282,8 +306,10 @@ void aqualoop_pumps_cycle(struct pumpcycle *cycle) {
         AQUALOOPDEBUG("%lu Pause 1..\n", cycle->next_ts);
       }
 
-      /* Do something else ... */
-      setpwm('a', mem_pwm[aqualoop_params_ram.MEM_number]);
+      /* PUMPING SUCTION */
+      //setpwm('a', mem_pwm[aqualoop_params_ram.MEM_number]);
+      aqualoop_setsuction(mem_pwm[aqualoop_params_ram.MEM_number]);
+      aqualoop_setbackflush(0);
     }
 
 
@@ -296,9 +322,11 @@ void aqualoop_pumps_cycle(struct pumpcycle *cycle) {
         AQUALOOPDEBUG("%lu Backflush..\n", cycle->next_ts);
       }
 
-      /* Do something else ... */
-      setpwm('a', 0);
-      setpwm('b', 0);
+      /* STOP */
+      //setpwm('a', 0);
+      //setpwm('b', 0);
+      aqualoop_setsuction(0);
+      aqualoop_setbackflush(0);
     }
 
 
@@ -311,8 +339,10 @@ void aqualoop_pumps_cycle(struct pumpcycle *cycle) {
         AQUALOOPDEBUG("%lu Pause 2..\n", cycle->next_ts);
       }
 
-      /* Do something else ... */
-      setpwm('b', 255);
+      /* BACKFLUSH */
+      //setpwm('b', 255);
+      aqualoop_setsuction(0);
+      aqualoop_setbackflush(255);
     }
 
 
@@ -327,9 +357,11 @@ void aqualoop_pumps_cycle(struct pumpcycle *cycle) {
         AQUALOOPDEBUG("%lu Next Suction..\n", cycle->next_ts);
       }
 
-      /* Do something else ... */
-      setpwm('a', 0);
-      setpwm('b', 0);
+      /* STOP */
+      //setpwm('a', 0);
+      //setpwm('b', 0);
+      aqualoop_setsuction(0);
+      aqualoop_setbackflush(0);
     }
 
 
@@ -349,9 +381,6 @@ void aqualoop_pumps_cycle(struct pumpcycle *cycle) {
       AQUALOOPDEBUG("Total: %lu \n", cycle->last_ts - cycle->start_ts);
       AQUALOOPDEBUG("Estim: %lu \n", aqualoop_pumpcycle_calc_runtime(cycle) );
 
-      /* Do something else ... */
-      setpwm('a', 0);
-      setpwm('b', 0);
     }
 
 
@@ -376,11 +405,12 @@ void aqualoop_pumps_cycle_init(void) {
   cycle_t1.cycles_total = aqualoop_params_ram.suction_c1;
   cycle_t1.cycles_count = 0;
 
+  /* DURATIONS are NOT user-configurable: Define a fixed cycle duration here */
   cycle_t1.duration_start = 10;
-  cycle_t1.duration_suction = 8;
+  cycle_t1.duration_suction = 900;
   cycle_t1.duration_pause1 = 2;
-  cycle_t1.duration_backflush = 6;
-  cycle_t1.duration_pause2 = 4;
+  cycle_t1.duration_backflush = 15;
+  cycle_t1.duration_pause2 = 5;
 
 
 
@@ -393,11 +423,12 @@ void aqualoop_pumps_cycle_init(void) {
   cycle_t2.cycles_total = aqualoop_params_ram.suction_c2;
   cycle_t2.cycles_count = 0;
 
+  /* DURATIONS are NOT user-configurable: Define a fixed cycle duration here */
   cycle_t2.duration_start = 10;
-  cycle_t2.duration_suction = 25;
-  cycle_t2.duration_pause1 = 5;
-  cycle_t2.duration_backflush = 16;
-  cycle_t2.duration_pause2 = 4;
+  cycle_t2.duration_suction = 900;  //15min
+  cycle_t2.duration_pause1 = 2;
+  cycle_t2.duration_backflush = 15; //15sec
+  cycle_t2.duration_pause2 = 5;
 
 
   al_statusbits.menu_chemical = false;    // Chemiereinigung ist erstmal deaktiviert
@@ -499,8 +530,10 @@ void aqualoop_cleaning_cycle(struct pumpcycle *cycle) {
       }
 
       /* Do something else ... */
-      setpwm('a', 0);
-      setpwm('b', 0);
+      //setpwm('a', 0);
+      //setpwm('b', 0);
+      aqualoop_setsuction(0);
+      aqualoop_setbackflush(0);
     }
 
     /* PART 1 */
@@ -753,8 +786,10 @@ void aqualoop_cleaning_cycle(struct pumpcycle *cycle) {
       //AQUALOOPDEBUG("Estim: %lu \n", aqualoop_pumpcycle_calc_runtime(cycle) );
 
       /* Do something else ... */
-      setpwm('a', 0);
-      setpwm('b', 0);
+      //setpwm('a', 0);
+      //setpwm('b', 0);
+      aqualoop_setsuction(0);
+      aqualoop_setbackflush(0);
     }
 
 

@@ -217,6 +217,9 @@ eeprom_init (void)
 
     .MEM_number = AQUALOOP_NUMBER_MEMBRANES,
   
+    .levl_tank_min = 0,
+    .levl_tank_max = 1023
+
   };
   eeprom_save (rainmaster_params, &rainmaster_temp, sizeof(rainmaster_params_t));
 #endif

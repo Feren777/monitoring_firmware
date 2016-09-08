@@ -5,17 +5,40 @@ dnl
 #include "services/intewa/aqualoop/aqualoop_sensors.h"
 #include "core/util/fixedpoint.h"
 
+//#include "services/intewa/rainmaster/rainmaster.h"
+
 dnl
 CONTROL_START
 
   THREAD(Telemetrics)
 
+    WAIT(30);
 
+    int16_t temp = 0;
+    char temp_str[5];
+
+    // Get value of 1-Wire sensor
+    temp = aqualoop_get_temperature(&romcodeVorlauf);
+     // Convert value to string
+    itoa_fixedpoint(temp, 2, temp_str);
+ 
+    // Write value to httplog
+    HTTPLOG("b7763b3a-cb0d-4a4e-8351-def7a39e9423.json?ts=%lu000&value=%s", clock_get_time(), temp_str);
+    WAIT(2);
+
+
+    // Write value to httplog
+    HTTPLOG("7d448212-7d73-4b7d-86ab-f275ff8ac13d.json?ts=%lu000&value=%d.%d", clock_get_time(), aqualoop_get_tanklevel() / 10 , aqualoop_get_tanklevel() % 10);
+    WAIT(2);
+
+
+    // Write value to httplog
+    HTTPLOG("a301d8d0-903b-1234-94bb-d943d061b6a8.json?ts=%lu000&value=%d", clock_get_time(), aqualoop_get_ADr());
+    WAIT(2);
 
   THREAD_END(Telemetrics)
 
   	ON STARTUP DO THREAD_START(Telemetrics) END;
-
 
 CONTROL_END
 

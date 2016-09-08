@@ -14,7 +14,8 @@
 #PB6	OUTPUT	 HIGH		Backflush (PWM)
 #PB7	OUTPUT	 HIGH		Air (PWM)
 #
-PG0	OUTPUT	HIGH		SludgePump
+#PG0	OUTPUT	HIGH		SludgePump
+PG0	OUTPUT	HIGH		Kugelhahn
 PG1	OUTPUT	HIGH		CompressorAir
 PG2	OUTPUT	HIGH		PiezoWarn
 #PA0	INPUT	LOW		SSKlarMin	

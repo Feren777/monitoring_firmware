@@ -53,6 +53,8 @@ volatile timestamp_t capture_ts;
 volatile timestamp_t get_ts;
 
 volatile uint16_t capt_adc_24v;
+volatile uint16_t capt_adc_adr;
+
 //volatile uint16_t capt_adc_9v;
 
 volatile uint16_t capt_adc_levelsensor;
@@ -79,11 +81,53 @@ uint16_t aqualoop_get_24v(void)
     adc = capt_adc_24v;
   }
 
-  long adc_volt = (((long)(adc) * 5080)/1024L);
+  long adc_volt = (((long)(adc) * 5080) / 1024L);
 
 
-  return (uint16_t)( adc_volt );
+  return (uint16_t)(adc_volt);
 }
+
+
+/*
+Stromschleife hängt an 200 Ohm Widerstand. Mit  U/R = I wird die Spannung gemessen und I berechnet.
+
+20 - 4 mA / 1600 mbar ist der Messbereich, Das Verhältnis von mA zu mBar ist 0,01
+
+Fließen z.B. ( 12 mA - 4 ) / 0,01 = 800 mBar absolut. Da -0.8 .. 0.8 nochmal 800 abziehen...
+
+
+
+*/
+
+int16_t aqualoop_get_ADr(void)
+{
+  uint16_t adc;
+
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    capture_ts = clock_get_time();
+    get_ts = capture_ts;
+    capt_adc_adr = adc_get(AQUALOOP_ADC_ADR_CHANNEL);
+    adc = capt_adc_adr;
+  }
+
+  long adc_pressure = (((long)(adc) * 5000) / 1024L);   // Wert von ADC zu MILLIVOLT
+
+  adc_pressure = ((adc_pressure * 100L) / 200);       // Sensor wird an 200 Ohm Widerstand angeschlossen: U/R = I
+  adc_pressure = (adc_pressure - 400L - 800L);      // Messbereich von 4-20 mA auf 0-16 mA umrechnen
+/*
+  adc_pressure = (adc_pressure - 4) / 16;            // Messbereich von 4-20 mA auf 0-16 mA umrechnen
+  adc_pressure = (adc_pressure * 1.6);               // pro Volt ergibt sich ein Druck von 1.6 mbar 
+  adc_pressure = (adc_pressure - 0.8);               // Messbereich auf -0.8 ... 0.8 bar umrechnen
+
+  adc_pressure = (adc_pressure / 2);
+  adc_pressure = (adc_pressure - 400)
+*/
+
+
+  return (int16_t)(adc_pressure);
+
+}
+
 
 /*
 * Spannungsteiler auf Platine ist 91k:10k @ 9V = 3.0397350
@@ -202,7 +246,7 @@ uint16_t aqualoop_get_levelsensor(void)
     capture_ts = clock_get_time();
     get_ts = capture_ts;
     
-    for (i=0; i<32; i++) {
+    for (i = 0; i < 32; i++) {
       capt_adc_levelsensor = adc_get(AQUALOOP_LEVEL_SENSOR);
       
       level_average = level_average + capt_adc_levelsensor;
@@ -251,7 +295,7 @@ int16_t aqualoop_get_current(uint8_t channel, int8_t offset)
 
     int8_t i;
 
-    for(i=0; i<64; i++) {
+    for(i = 0; i < 64; i++) {
       adc_temp = adc_get(channel) - offset;
       adc_average = adc_average + adc_temp;
     }
@@ -309,14 +353,16 @@ int16_t aqualoop_get_temperature(ow_rom_code_t * rom) {
 void init_sensors(void) {
 
   #ifdef ONEWIRE_SUPPORT
+  /*
   if (parse_ow_rom(CONF_SENSOR_GELB, &romcodeGelb) == -1) {
     AQUALOOPDEBUG("parse error ow GELB\n");
   }
   if (parse_ow_rom(CONF_SENSOR_GRUEN, &romcodeGruen) == -1) {
     AQUALOOPDEBUG("parse error ow GRUEN\n");
   }
+  */
   if (parse_ow_rom(CONF_SENSOR_VORLAUF, &romcodeVorlauf) == -1) {
-    AQUALOOPDEBUG("parse error ow GRUEN\n");
+    AQUALOOPDEBUG("parse error ow VORLAUF\n");
   }
 
   #endif
@@ -347,8 +393,8 @@ void aqualoop_sensors_periodic(void) {
 void aqualoop_sensors_30sec(void) {
 
   #ifdef ONEWIRE_SUPPORT
-  aqualoop_get_temperature(&romcodeGelb);
-  aqualoop_get_temperature(&romcodeGruen);
+  //aqualoop_get_temperature(&romcodeGelb);
+  //aqualoop_get_temperature(&romcodeGruen);
   aqualoop_get_temperature(&romcodeVorlauf);
   #endif
   

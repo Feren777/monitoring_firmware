@@ -41,7 +41,7 @@
 
 #include "services/clock/clock.h"
 #include "hardware/input/buttons/buttons.h"
-
+#include "protocols/uip/uip.h"
 
 
 /* Seriennummer des Produkts */
@@ -53,9 +53,60 @@
 
 
 
-#define RAINMASTER_STATE_IDLE     0
-#define RAINMASTER_STATE_AKKU     1
-#define RAINMASTER_STATE_PUMP     2
+#define RAINMASTER_STATE_IDLE        0   // Initialzustand
+#define RAINMASTER_STATE_REQUESTED   1   // Haben genügend Regenwasser im eigenen Tank
+#define RAINMASTER_STATE_SELF        2   //
+
+
+
+
+#define RAINMASTER_LEVEL_SENSOR		  4		/* PORT PF4 (ADC4) connected to level sensor SIGNAL AD5 on board */
+
+
+#define RM_COUNT_DEVICES            3
+#define RM_ID1                    101
+#define RM_ID2                    102
+#define RM_ID3                    103
+
+
+#define IP_RM1 = 192.168.1.101
+#define IP_RM2 = 192.168.1.102
+#define IP_RM3 = 192.168.1.103
+
+
+#define TANK_MIN      100
+#define TANK_MAX      250
+
+
+
+/* Sämtliche im EEPROM gespeicherte Werte sind hier hinterlegt */
+/* Anlagen-Parameter werden über menuconfig initialisiert */
+typedef struct {
+
+  uint8_t MEM_number;       /* Anzahl der verfügbaren Membranen */
+
+  uint16_t levl_tank_min;
+  uint16_t levl_tank_max;
+
+} rainmaster_params_t;
+
+extern rainmaster_params_t rainmaster_params_ram;
+
+
+
+typedef struct RMdevices {
+  uint8_t       device_id;
+  uint16_t      tanklevel;
+  uint8_t       request_state;
+  uint8_t       busy;
+//  uip_ipaddr_t  device_ip;
+} rm_device_t;
+
+extern rm_device_t rm_001;
+extern rm_device_t rm_002;
+extern rm_device_t rm_003;
+
+
 
 
 /* Allgemeine Statusvariablen und Zustände der Ein-/Ausgänge */
@@ -65,24 +116,18 @@ typedef struct RMstates {
   unsigned int Pos1Schalter:1;
   unsigned int PumpenKontakt:1;
 
-  unsigned int free1:1;    //0=Netzbetrieb OK, 1=Akku-Notfallbetrieb
-  unsigned int free2:1;    //1=mute
+  //uint16_t     tanklevel;         // eigener Vorrat an Regenwasser 
+
+  unsigned int Kugelhahn:1;       //0=Regenwasser, 1=Klarwasser/Nachspeisung
+  unsigned int Magnetventil:1;    //0=zu, 1=auf
   unsigned int free3:1;    //1=diag mode on
-  unsigned int free4:1;    //internal, in the confirm7241()
+  unsigned int free4:1;    //internal
 } rm_statusbits_t;
 
 extern rm_statusbits_t rm_status;
 
+extern uint16_t my_tanklevel;
 
-/* Sämtliche im EEPROM gespeicherte Werte sind hier hinterlegt */
-/* Anlagen-Parameter werden über menuconfig initialisiert */
-typedef struct RMparams {
-
-  uint8_t MEM_number;       /* Anzahl der verfügbaren Membranen */
-
-} rainmaster_params_t;
-
-extern rainmaster_params_t rainmaster_params_ram;
 
 
 /* Current time stamp */
@@ -97,6 +142,7 @@ extern uint16_t rm_offcounter;
 
 
 
+extern uint8_t ecmd_callback_blocking;
 
 
 void default_button_handler(buttons_ButtonsType button, uint8_t status);
@@ -104,6 +150,9 @@ void default_button_handler(buttons_ButtonsType button, uint8_t status);
 void default_gui_beep (void);
 
 
+uint16_t rainmaster_get_levelsensor(void);
+uint16_t rainmaster_get_tanklevel(void);
+void rainmaster_request_callback(char* text, uint8_t len);
 
 int16_t rainmaster_onrequest(char *cmd, char *output, uint16_t len);
 
@@ -113,7 +162,7 @@ int16_t rainmaster_periodic(void);
 
 void rainmaster_mainloop(void);
 
-
+void rainmaster_long_timer(void);
 
 
 

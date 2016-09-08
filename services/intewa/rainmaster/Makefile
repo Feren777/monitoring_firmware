@@ -8,7 +8,7 @@ $(RAINMASTER_SUPPORT)_SRC += services/intewa/rainmaster/rainmaster_menu.c
 ##$(RAINMASTER_SUPPORT)_SRC += services/intewa/rainmaster/rainmaster_net.c
 ##$(RAINMASTER_SUPPORT)_SRC += services/intewa/rainmaster/aqualoop_gui.c
 
-##$(RAINMASTER_SUPPORT)_ECMD_SRC += services/intewa/rainmaster/rainmaster_ecmd.c
+$(RAINMASTER_SUPPORT)_ECMD_SRC += services/intewa/rainmaster/rainmaster_ecmd.c
 
 ##############################################################################
 # generic fluff

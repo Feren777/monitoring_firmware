@@ -159,9 +159,9 @@ struct eeprom_config_t
 #endif
 
 #ifdef RAINMASTER_SUPPORT
-  rainmaster_params_t rainmaster_params;    // Im EEPROM speicherbare Parameter der Anlage
+  rainmaster_params_t rainmaster_params;  // Im EEPROM speicherbare Parameter der Anlage
   char rainmaster_serial[9];              // Seriennummer bestehend aus max. 8 Zeichen
-  char monitoring_uid[9];               // User-ID bestehend aus max. 8 Zeichen
+  char monitoring_uid[9];                 // User-ID bestehend aus max. 8 Zeichen
 #endif
 
   uint8_t crc;

@@ -56,6 +56,7 @@
 
 #include "hardware/rfid/rfid.h"
 #include "hardware/rfid/em4095.h"
+#include "hardware/pwm/pwm.h"
 
 //#include "services/lcd-menu/menu_prompt.h"
 
@@ -169,7 +170,7 @@ void al_menu_akku_display (void) {
 
 
 
-void al_menu_sensors_display (void) {
+void al_menu_supply_display (void) {
   hd44780_goto(0, 0);
   char volt24a_buf[20];
   sprintf (volt24a_buf, "   24V: %4d", aqualoop_get_24v()   );
@@ -192,6 +193,7 @@ void al_menu_sensors_display (void) {
 }
 
 void al_menu_sens_current_display (void) {
+  /*
   hd44780_goto(0, 0);  char ampsI0a_buf[20]; char temp_str[6]; int16_t temp = 0;
   //sprintf (ampsI0a_buf, "Isens0: %2d.%03u A", (aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_0)/1000L), (aqualoop_get_current(AQUALOOP_ADC_CURR_SENS_0)%1000L) );
   temp = aqualoop_get_temperature(&romcodeGelb);
@@ -216,6 +218,7 @@ void al_menu_sens_current_display (void) {
   char ts_buf [20];
   sprintf (ts_buf,"Uptime: %lu", clock_get_uptime());
   fputs (ts_buf, &lcd);
+  */
 }
 
 
@@ -238,14 +241,14 @@ void al_menu_rfid_display (void) {
 
 void al_menu_DEBUG_display (void) {
 
-#if 0  
+  
   hd44780_goto(0, 0);
 
   char debug_buf[20];
-  sprintf (debug_buf, "" );
+  sprintf (debug_buf, "PWM: %d", aqualoop_get_levelsensor() );
   fputs (debug_buf, &lcd);
-#endif
 
+  setpwm('a', aqualoop_get_levelsensor());
 }
 
 
@@ -420,10 +423,23 @@ void al_basis_info_display(void) {
 
   hd44780_goto(3, 0);
   char val_buf [20];
-  sprintf (val_buf,"BRmin %c   |CLmax %c  ", (al_sensors.SSBRmin ? 2:1), (al_sensors.SSKlarmax ? 2:1) );
+  sprintf (val_buf,"BRmin %c   |CLmax %c  ", (al_sensors.SSBRmin ? 1:2), (al_sensors.SSKlarmax ? 1:2) );
   fputs (val_buf, &lcd);
 }
 
+
+void al_menu_version_display(void) {
+
+  hd44780_goto(0, 0);  char version1_buf[20];
+                       // 12345678901234567890
+  sprintf (version1_buf, "    INTEWA  GmbH    ");
+  fputs (version1_buf, &lcd);
+
+
+
+
+
+}
 
 /*
 d888888b d888888b .88b  d88. d88888b d8888b. .d8888. 
@@ -434,14 +450,43 @@ d888888b d888888b .88b  d88. d88888b d8888b. .d8888.
    YP    Y888888P YP  YP  YP Y88888P 88   YD `8888Y' 
 */
 
-void al_menu_timers_display(void) {
+void al_menu_sensors_display(void) {
   hd44780_goto(0, 0);
   lcdm_write_function(lcdm_get_current_menu()->text);
 
-  al_draw_menu_blankline(1);
-  al_draw_menu_blankline(2);
-  al_draw_menu_blankline(3);
+  hd44780_goto(1, 0);  char pressAdr_buf[20];
+                       // 12345678901234567890
+                       // ADr: -1234 mBar     
+  sprintf (pressAdr_buf, "ADr: %+4d mbar      ", aqualoop_get_ADr() );
+  fputs (pressAdr_buf, &lcd);
 
+  hd44780_goto(2, 0);  char volt24_buf[20];
+                       // 12345678901234567890
+                       // Supply: 24.00 V     
+  sprintf (volt24_buf,   "Vin: %2d.%02d V     ", measure_to_int (aqualoop_get_24v()) , measure_to_dec (aqualoop_get_24v())   );
+  fputs (volt24_buf, &lcd);
+  
+
+  hd44780_goto(3, 0);
+  char tank_buf [20];
+
+  int16_t temp = 0;
+  char temp_str[6];
+  temp = aqualoop_get_temperature(&romcodeVorlauf);
+  itoa_fixedpoint(temp, 2, temp_str);
+
+                       // 12345678901234567890
+                       // Tnk: 100.0 % 34,25°C 
+  sprintf (tank_buf,     "Tnk: %3d.%01d %c %s%cC", aqualoop_get_tanklevel() / 10 , aqualoop_get_tanklevel() % 10 , 0x25, temp_str, 0xdf );
+  fputs (tank_buf, &lcd);
+
+  /*
+                       // 12345678901234567890
+                       // Version: ae129f1    
+  hd44780_goto(3, 0);  char serial_buf[20];
+  sprintf (serial_buf, "Version: %s    ", VERSION_STRING );
+  fputs (serial_buf, &lcd);
+  */
 }
 
 
@@ -497,7 +542,7 @@ void al_menu_cycles_display(void) {
 
     // 12345678901234567890
     // C1:S N:00/04 T:00:00
-    sprintf (statC1_buf,"C1:%c N:%02d/%02d T:%02d:%02d", statState1, cycle_t1.cycles_count, cycle_t1.cycles_total, rem_min, rem_sec );
+    sprintf (statC1_buf,"1:%c N:%02d/%02d T:%03d:%02d", statState1, cycle_t1.cycles_count, cycle_t1.cycles_total, rem_min, rem_sec );
   }
   else {
 
@@ -516,9 +561,9 @@ void al_menu_cycles_display(void) {
     else
       rem_min = 60 - date.min + cycle_t1.min - 1;
 
-    // 12345678901234567890
-    // C1:F Next C:00:00:00
-    sprintf (statC1_buf,"C1:%c Next C:%02d:%02d:%02d", statState1, rem_hour, rem_min, 59-date.sec );
+                      // 12345678901234567890
+                      // C1:Waiting: 00:00:00
+    sprintf (statC1_buf,"C1:Waiting: %02d:%02d:%02d", rem_hour, rem_min, 59-date.sec );
   }
   fputs (statC1_buf, &lcd);
 
@@ -533,7 +578,7 @@ void al_menu_cycles_display(void) {
 
     // 12345678901234567890
     // C1:S N:00/04 T:00:00
-    sprintf (statC2_buf,"C2:%c N:%02d/%02d T:%02d:%02d", statState2, cycle_t2.cycles_count, cycle_t2.cycles_total, rem_min, rem_sec );
+    sprintf (statC2_buf,"2:%c N:%02d/%02d T:%03d:%02d", statState2, cycle_t2.cycles_count, cycle_t2.cycles_total, rem_min, rem_sec );
   }
   else {
 
@@ -554,17 +599,18 @@ void al_menu_cycles_display(void) {
 
     // 12345678901234567890
     // C1:F Next C:00:00:00
-    sprintf (statC2_buf,"C2:%c Next C:%02d:%02d:%02d", statState2, rem_hour, rem_min, 59-date.sec );
+    sprintf (statC2_buf,"C2:Waiting: %02d:%02d:%02d", rem_hour, rem_min, 59-date.sec );
   }
   fputs (statC2_buf, &lcd);
 
 
-
+/*
   hd44780_goto(3, 0);
   char dbx_buf [20];
   sprintf (dbx_buf,"%02d:%02d", date.min, date.sec );
   fputs (dbx_buf, &lcd);
-
+*/
+  al_draw_menu_blankline(3);
 }
 
 
@@ -1565,40 +1611,31 @@ void set_DNS (void) {
  ## INFO-TOP-LEVEL ##
   
           NAME              NEXT                PARENT      CHILD                    NEXT       ENTER      DISPLAY                    TEXT
-*/                                                                                                                                   //12345678901234567890
-MENU_ITEM(mi_system_info,   mi_timers_info,     NULL_MENU,  mi_config_c12_set_menu,  nav_next,  nav_down,  al_basis_info_display,     "System Info");
+*/                                                                                                                                   
+MENU_ITEM(mi_system_info,   mi_sensors_info,     NULL_MENU,  mi_config_c12_set_menu,  nav_next,  nav_down,  al_basis_info_display,        "System Info");
 
-MENU_ITEM(mi_timers_info,   mi_acycle_info,     NULL_MENU,  mi_timers_set_menu,      nav_next,  nav_down,  al_menu_timers_display,    "=[ TIMERS T1/T1 ]===");
+MENU_ITEM(mi_sensors_info,  mi_acycle_info,     NULL_MENU,  mi_timers_set_menu,      nav_next,  nav_down,  al_menu_sensors_display,      "=[ SENSORS ]========");
 
-MENU_ITEM(mi_acycle_info,   mi_monitor_info,    NULL_MENU,  mi_acycle_set_menu,      nav_next,  nav_down,  al_menu_cycles_display,    "=[ CYCLES C1/C2 ]===");
+MENU_ITEM(mi_acycle_info,   mi_monitor_info,    NULL_MENU,  mi_acycle_set_menu,      nav_next,  nav_down,  al_menu_cycles_display,       "=[ CYCLES C1/C2 ]===");
 
-MENU_ITEM(mi_monitor_info,   mi_level_info,     NULL_MENU,  mi_acycle_set_menu,      nav_next,  nav_down,  al_menu_monitor_display,   "=[ MONITORING ]=====");
+MENU_ITEM(mi_monitor_info,  mi_clock_info,      NULL_MENU,  mi_acycle_set_menu,      nav_next,  nav_down,  al_menu_monitor_display,      "=[ MONITORING ]=====");
 
-MENU_ITEM(mi_level_info,    mi_clock_info,      NULL_MENU,  mi_level_min_set_menu,      nav_next,  nav_down,  al_menu_sens_level_display,    "=[ LEVEL SENSOR ]===");
+//MENU_ITEM(mi_level_info,    mi_clock_info,      NULL_MENU,  mi_level_min_set_menu,   nav_next,  nav_down,  al_menu_sens_level_display,   "=[ LEVEL SENSOR ]===");
 
-MENU_ITEM(mi_clock_info,    mi_network1_info,   NULL_MENU,  mi_clock_cl_set_menu,    nav_next,  nav_down,  al_menu_time_display,      "=[ MAIN CLOCK ]=====");
+MENU_ITEM(mi_clock_info,    mi_network1_info,   NULL_MENU,  mi_clock_cl_set_menu,    nav_next,  nav_down,  al_menu_time_display,         "=[ MAIN CLOCK ]=====");
 
-MENU_ITEM(mi_network1_info, mi_network2_info,   NULL_MENU,  mi_network_ip_set_menu,  nav_next,  nav_down,  al_menu_network_1_display, "=[ Info NETWORK 1 ]=");
-MENU_ITEM(mi_network2_info, mi_test_info,       NULL_MENU,  mi_network_dns_set_menu, nav_next,  nav_down,  al_menu_network_2_display, "=[ Info NETWORK 2 ]=");
+MENU_ITEM(mi_network1_info, mi_network2_info,   NULL_MENU,  mi_network_ip_set_menu,  nav_next,  nav_down,  al_menu_network_1_display,    "=[ Info NETWORK 1 ]=");
 
+MENU_ITEM(mi_network2_info, mi_test_info,       NULL_MENU,  mi_network_dns_set_menu, nav_next,  nav_down,  al_menu_network_2_display,    "=[ Info NETWORK 2 ]=");
 
-MENU_ITEM(mi_test_info,     mi_system_info,     NULL_MENU,  mi_acycle_set_menu,      nav_next,  nav_down,  al_menu_cycles_display,    "=[ TEST MODE ]======");
-
-
-MENU_ITEM(mi_config_info,   mi_system_info,       NULL_MENU,  mi_config_mem_set_menu,  nav_next,  nav_down,  al_menu_akku_display,      "Configuration");
-//MENU_ITEM(mi_test_info,     mi_system_info,     NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_sensors_display,   "Test Mode");
-
-MENU_ITEM(mi_current_info,  mi_system_info,     NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_sens_current_display,   "Current Sensors");
-//MENU_ITEM(mi_rfid_info,     mi_system_info,     NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_rfid_display,              "RFID Sensors");
-
-MENU_ITEM(mi_DEBUG_info,     mi_system_info,     NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_DEBUG_display,              "DEBUG");
+MENU_ITEM(mi_test_info,     mi_system_info,     NULL_MENU,  mi_acycle_set_menu,      nav_next,  nav_down,  al_menu_cycles_display,       "=[ TEST MODE ]======");
 
 
-
-
-
-
-
+MENU_ITEM(mi_config_info,   mi_system_info,     NULL_MENU,  mi_config_mem_set_menu,  nav_next,  nav_down,  al_menu_akku_display,         "Configuration");
+//MENU_ITEM(mi_test_info,     mi_system_info,     NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_sensors_display,    "Test Mode");
+MENU_ITEM(mi_current_info,  mi_system_info,     NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_sens_current_display, "Current Sensors");
+//MENU_ITEM(mi_rfid_info,     mi_system_info,     NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_rfid_display,       "RFID Sensors");
+MENU_ITEM(mi_DEBUG_info,     mi_system_info,    NULL_MENU,  mi_test_set_menu,        nav_next,  nav_down,  al_menu_DEBUG_display,        "DEBUG");
 
 
 /*
@@ -1701,7 +1738,7 @@ MENU_ITEM(mi_network1_set_ntp,      mi_network_ntp_set_menu,   mi_network1_set_m
  ## TIMERS MENU-LEVEL ##
          NAME                     NEXT            PARENT            CHILD/GROUP         NEXT         ENTER        DISPLAY                    TEXT
 */ 
-MENU_ITEM(mi_timers_set_menu,     NULL_MENU,      mi_timers_info,   NULL_MENU,          NULL_FUNC,   NULL_FUNC,   NULL_FUNC,                 "Timer Settings");
+MENU_ITEM(mi_timers_set_menu,     NULL_MENU,      mi_sensors_info,   NULL_MENU,          NULL_FUNC,   NULL_FUNC,   NULL_FUNC,                 "Timer Settings");
 
 /*
  ## CYCLES MENU-LEVEL ##

@@ -33,7 +33,10 @@
 
 
 #define AQUALOOP_ADC_24V_CHANNEL	0		/* PORT PF0 (ADC0) connected to 24 V measurement voltage divider */
-//#define AQUALOOP_ADC_9V_CHANNEL		3	/* PORT PF3 (ADC3) connected to  9 V measurement voltage divider */
+#define AQUALOOP_ADC_ADR_CHANNEL	1		/* PORT PF1 (ADC1) connected to ADr (Pumps) measurement voltage divider */
+#define AQUALOOP_ADC_ADG_CHANNEL	2		/* PORT PF1 (ADC1) connected to ADg (Air) measurement voltage divider */
+
+#define AQUALOOP_ADC_9V_CHANNEL		3		/* PORT PF3 (ADC3) connected to  9 V measurement voltage divider */
 
 #define AQUALOOP_ADC_CURR_SENS_0	5		/* PORT PF5 (ADC5) connected to current */
 #define AQUALOOP_ADC_CURR_SENS_1	6
@@ -46,9 +49,9 @@
 #define CONF_SENSOR_GELB	"28cd23d5050000c8" 	/* V2 Board bei Haraldo */
 #define CONF_SENSOR_GRUEN	"282349d4050000d1" 	/* V2 Board bei Haraldo */
 
-#define CONF_SENSOR_VORLAUF "28cffcd405000018"	/* Demo-Board im Office */
+#define CONF_SENSOR_VORLAUF "28cffcd405000018"	/* Demo-Board im Office u Anlage bei Oliver */
 
-
+#define CONF_SENSOR_OLIVER	"28cffcd405000018"
 
 
 typedef struct ALsensorBits {
@@ -76,12 +79,14 @@ extern volatile timestamp_t get_ts;
 
 /* Eingangsspannungen am A/D Wandler */
 extern volatile uint16_t capt_adc_24v;
+extern volatile uint16_t capt_adc_adr;
+
 //extern volatile uint16_t capt_adc_9v;
 
 /* 1W Temperatursensor */
 #ifdef ONEWIRE_SUPPORT
-ow_rom_code_t romcodeGelb;
-ow_rom_code_t romcodeGruen;
+//ow_rom_code_t romcodeGelb;
+//ow_rom_code_t romcodeGruen;
 ow_rom_code_t romcodeVorlauf;
 int16_t aqualoop_get_temperature(ow_rom_code_t *rom);
 #endif
@@ -101,6 +106,8 @@ void aqualoop_sensors_30sec(void);
 
 
 uint16_t aqualoop_get_24v(void);
+int16_t aqualoop_get_ADr(void);
+
 //uint16_t aqualoop_get_9v(void);
 
 uint16_t aqualoop_get_levelsensor(void);
