@@ -1,6 +1,6 @@
-About INTEWA Monitoring
-=======================
-This project aims to bring internet connectivity to the INTEWA rainwater treatment products. Monitoring is the automated process by which measurements and condition analysis of a rainwater harvesting system is transmitted over remote networks. Telemetry is important in rainwater management, not only for quality and gauging of water but mainly for reliability, health and usage of local equipment in difficult or inaccessible areas.
+About Monitoring
+================
+This project aims to bring internet connectivity to rainwater treatment products. Monitoring is the automated process by which measurements and condition analysis of a rainwater harvesting system is transmitted over remote networks. Telemetry is important in rainwater management, not only for quality and gauging of water but mainly for reliability, health and usage of local equipment in difficult or inaccessible areas.
 
 Based on Ethersex
 =================
